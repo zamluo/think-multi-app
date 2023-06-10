@@ -85,7 +85,13 @@ class MultiApp
             if (!empty($bind)) {
                 // 获取当前子域名
                 $subDomain = $this->app->request->subDomain();
-                $domain    = $this->app->request->host(true);
+
+                // 优先使用HTTP_HOST而且不是HTTP_X_FORWARDED_HOST
+                if (!env('app.use_x_forwarded_host', false)) {
+                    $this->app->request->setHost($this->app->request->server('HTTP_HOST'));
+                }
+                // 获取host带端口
+                $domain    = $this->app->request->host(env('app.strict_host', false));
 
                 if (isset($bind[$domain])) {
                     $appName = $bind[$domain];
